@@ -71,6 +71,9 @@ export default async function HomePage() {
         latest={featured ? { youtubeId: featured.youtubeId, title: featured.title, dateLabel: featured.dateLabel, thumbnail: featured.thumbnail } : null}
       />
 
+      {/* ---- Featured Team Members Showcase ---- */}
+      <TeamShowcase members={members} title="Meet the Voices Behind the Podcast" subtitle="FEATURED HOSTS & LEADERSHIP" />
+
       {featured && (
         <section id="featured" className="rule px-[clamp(18px,4vw,56px)] py-[clamp(60px,11vh,140px)]">
           <div className="shell px-0">
@@ -120,9 +123,6 @@ export default async function HomePage() {
 
       {/* ---- Interactive 3D Audio Recording Showcase ---- */}
       <AudioStudio3D />
-
-      {/* ---- Featured Team Members Showcase ---- */}
-      <TeamShowcase members={members} title="Meet the Voices Behind the Podcast" subtitle="FEATURED HOSTS & LEADERSHIP" />
 
       {/* ---- Episodes ---- */}
       <section id="episodes" className="rule px-[clamp(18px,4vw,56px)] py-[clamp(56px,10vh,130px)]">
