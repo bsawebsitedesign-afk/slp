@@ -126,9 +126,20 @@ export async function getContent<K extends ContentKey>(key: K): Promise<SiteCont
   try {
     const row = await prisma.setting.findUnique({ where: { key } });
     if (!row) return DEFAULTS[key];
-    return Array.isArray(DEFAULTS[key])
-      ? ((row.value as SiteContent[K]) ?? DEFAULTS[key])
-      : ({ ...DEFAULTS[key], ...(row.value as object) } as SiteContent[K]);
+    if (Array.isArray(DEFAULTS[key])) {
+      const dbArr = (row.value as any[]) || [];
+      const defaultArr = DEFAULTS[key] as any[];
+      return dbArr.map((dbItem: any, idx: number) => {
+        const defaultItem = defaultArr.find((d: any) => d.id === dbItem.id || d.name === dbItem.name) || defaultArr[idx] || {};
+        return {
+          ...defaultItem,
+          ...dbItem,
+          fullBio: dbItem.fullBio || defaultItem.fullBio || "",
+          linkedinUrl: dbItem.linkedinUrl || defaultItem.linkedinUrl || "",
+        };
+      }) as unknown as SiteContent[K];
+    }
+    return ({ ...DEFAULTS[key], ...(row.value as object) } as SiteContent[K]);
   } catch (e) {
     console.warn(`[getContent] Database lookup failed for key "${key}", falling back to DEFAULTS.`, e);
     return DEFAULTS[key];
