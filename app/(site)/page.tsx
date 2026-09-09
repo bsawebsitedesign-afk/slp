@@ -205,7 +205,7 @@ export default async function HomePage() {
           <Tilt3D maxTilt={10} scale={1.03} className="w-full">
             <div className="reveal-mask relative aspect-[4/3] overflow-hidden rounded-3xl bg-ink-2 ring-1 ring-steel/12 shadow-2xl">
               <Image
-                src="/brand/podcast-hosts-art.png"
+                src="/brand/podcast-hosts-art-home.jpeg"
                 alt="Security Leader Podcast cover artwork"
                 fill
                 sizes="(max-width: 1024px) 100vw, 40vw"
