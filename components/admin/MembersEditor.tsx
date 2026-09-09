@@ -118,13 +118,37 @@ export function MembersEditor({ members: initial }: { members: TeamMember[] }) {
                   </label>
 
                   <label className="flex flex-col gap-1.5">
-                    <Label>Bio / Summary</Label>
+                    <Label hint="e.g. https://www.linkedin.com/in/username">LinkedIn Profile URL</Label>
+                    <input
+                      type="url"
+                      value={m.linkedinUrl || ""}
+                      onChange={(e) => update(idx, "linkedinUrl", e.target.value)}
+                      className={inputCls}
+                      placeholder="https://www.linkedin.com/in/..."
+                    />
+                  </label>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="flex flex-col gap-1.5">
+                    <Label hint="Brief summary on card">Card Bio Summary</Label>
                     <textarea
                       rows={2}
                       value={m.bio}
                       onChange={(e) => update(idx, "bio", e.target.value)}
                       className={`${inputCls} resize-y`}
                       placeholder="Brief member background..."
+                    />
+                  </label>
+
+                  <label className="flex flex-col gap-1.5">
+                    <Label hint="Full multi-paragraph story shown inside popup modal">Full Detailed Bio (Popup Modal)</Label>
+                    <textarea
+                      rows={4}
+                      value={m.fullBio || ""}
+                      onChange={(e) => update(idx, "fullBio", e.target.value)}
+                      className={`${inputCls} resize-y`}
+                      placeholder="Detailed member biography & background..."
                     />
                   </label>
                 </div>
