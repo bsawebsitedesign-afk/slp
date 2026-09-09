@@ -203,14 +203,14 @@ export default async function HomePage() {
           </div>
 
           <Tilt3D maxTilt={10} scale={1.03} className="w-full">
-            <div className="reveal-mask relative aspect-[4/3] overflow-hidden rounded-3xl bg-ink-2 ring-1 ring-steel/12 shadow-2xl">
+            <div className="reveal-mask relative aspect-[4/3] overflow-hidden rounded-3xl bg-ink-3 ring-1 ring-steel/12 shadow-2xl flex items-center justify-center p-2">
               <Image
                 src="/brand/podcast-hosts-art-home.jpeg"
                 alt="Security Leader Podcast cover artwork"
                 fill
                 sizes="(max-width: 1024px) 100vw, 40vw"
                 loading="lazy"
-                className="parallax-slow object-cover"
+                className="parallax-slow object-contain p-2"
               />
             </div>
           </Tilt3D>
