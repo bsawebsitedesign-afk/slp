@@ -158,29 +158,35 @@ export function TeamShowcase({
 
       </div>
 
-      {/* Cyber-Holographic Full Profile Modal Popup */}
+      {/* Cyber-Holographic Executive Bio Modal Popup */}
       {selectedMember && (
         <div
-          className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 bg-ink/80 backdrop-blur-xl animate-fade-in"
+          className="fixed inset-0 z-100 flex items-center justify-center p-3 sm:p-6 bg-ink/85 backdrop-blur-2xl animate-fade-in"
           onClick={() => setSelectedMember(null)}
         >
           <div
-            className="relative w-full max-w-3xl max-h-[88vh] overflow-y-auto rounded-3xl border border-steel/25 bg-ink-2/95 p-6 sm:p-8 shadow-[0_25px_70px_rgba(0,0,0,0.85)] text-left ring-1 ring-steel/20"
+            className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl border border-steel/25 border-t-2 border-t-signal-bright bg-ink-2/95 p-6 sm:p-9 shadow-[0_30px_90px_rgba(0,0,0,0.92)] text-left ring-1 ring-steel/20"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Background Ambient Glow inside Modal */}
+            <div
+              aria-hidden
+              className="absolute top-0 right-0 h-64 w-64 rounded-full bg-signal-bright/10 blur-3xl pointer-events-none"
+            />
+
             {/* Close Button */}
             <button
               type="button"
               onClick={() => setSelectedMember(null)}
-              aria-label="Close modal"
-              className="absolute top-5 right-5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-steel/25 bg-ink-3 font-mono text-sm text-steel transition-colors hover:border-signal hover:bg-signal/20 hover:text-bone"
+              aria-label="Close profile"
+              className="absolute top-5 right-5 z-20 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-steel/25 bg-ink-3 font-mono text-sm text-steel transition-all duration-300 hover:border-signal hover:bg-signal/20 hover:text-bone shadow-md"
             >
               ✕
             </button>
 
             {/* Modal Header: Avatar & Key Info */}
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-              <div className="relative aspect-square w-28 sm:w-36 shrink-0 overflow-hidden rounded-2xl border border-steel/20 bg-ink-3 shadow-xl">
+            <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-center">
+              <div className="relative aspect-square w-28 sm:w-36 shrink-0 overflow-hidden rounded-2xl border-2 border-steel/20 bg-ink-3 shadow-2xl ring-2 ring-signal/20">
                 <Image
                   src={selectedMember.photo}
                   alt={selectedMember.name}
@@ -192,24 +198,25 @@ export function TeamShowcase({
                     transform: `scale(${(selectedMember.zoom || 100) / 100})`,
                   }}
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-ink-2/80 via-transparent to-transparent" />
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5 min-w-0">
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-signal/30 bg-signal/15 px-3 py-1 font-mono text-[10px] tracking-[0.14em] text-signal-bright uppercase">
-                    <span className="h-1.5 w-1.5 rounded-full bg-signal-bright animate-ping" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-signal-bright/40 bg-signal/20 px-3.5 py-1 font-mono text-[10.5px] font-bold tracking-[0.16em] text-signal-bright uppercase shadow-sm">
+                    <span className="h-2 w-2 rounded-full bg-signal-bright animate-ping" />
                     {selectedMember.tag}
                   </span>
-                  <span className="font-mono text-[10px] tracking-[0.2em] text-steel-dim uppercase">
-                    SLP LEADERSHIP
+                  <span className="font-mono text-[10.5px] font-bold tracking-[0.22em] text-steel-dim uppercase">
+                    SLP EXECUTIVE DOSSIER
                   </span>
                 </div>
 
-                <h2 className="display text-2xl sm:text-3xl text-bone">
+                <h2 className="display text-3xl sm:text-4xl text-bone tracking-tight">
                   {selectedMember.name}
                 </h2>
 
-                <p className="font-mono text-xs text-signal-bright font-medium tracking-wide">
+                <p className="font-mono text-xs sm:text-sm text-signal-bright font-semibold tracking-wide">
                   {selectedMember.role}
                 </p>
 
@@ -219,9 +226,9 @@ export function TeamShowcase({
                     href={selectedMember.linkedinUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-1 inline-flex w-fit items-center gap-2 rounded-full border border-[#0A66C2]/40 bg-[#0A66C2]/15 px-4 py-1.5 font-mono text-[11px] tracking-[0.14em] text-bone uppercase transition-all duration-300 hover:border-[#0A66C2] hover:bg-[#0A66C2] hover:shadow-lg hover:shadow-[#0A66C2]/30"
+                    className="mt-1.5 inline-flex w-fit items-center gap-2.5 rounded-full bg-[#0A66C2] px-5 py-2 font-mono text-[11px] font-bold tracking-[0.16em] text-white uppercase transition-all duration-300 hover:bg-[#004182] hover:scale-105 shadow-lg shadow-[#0A66C2]/30"
                   >
-                    <DoodleLinkedIn className="h-4 w-4" fill="#0A66C2" />
+                    <DoodleLinkedIn className="h-4 w-4 fill-white" fill="#FFFFFF" />
                     <span>Connect on LinkedIn ↗</span>
                   </a>
                 )}
@@ -230,27 +237,78 @@ export function TeamShowcase({
 
             <div className="my-6 block h-px w-full bg-steel/15" />
 
-            {/* Detailed Bio Content */}
-            <div className="flex flex-col gap-4 text-steel-dim text-sm sm:text-[15px] leading-relaxed">
-              {(selectedMember.fullBio || selectedMember.bio)
-                .split("\n\n")
-                .map((paragraph, i) => (
-                  <p key={i} className="text-steel-dim leading-[1.8]">
-                    {paragraph}
-                  </p>
-                ))}
+            {/* Detailed Bio Content with Structured Layout */}
+            <div className="flex flex-col gap-5">
+              {(() => {
+                const paragraphs = (selectedMember.fullBio || selectedMember.bio)
+                  .split("\n\n")
+                  .map((p) => p.trim())
+                  .filter(Boolean);
+
+                return paragraphs.map((paragraph, i) => {
+                  const isFirst = i === 0;
+                  const isLast = i === paragraphs.length - 1 && paragraphs.length > 1;
+                  const isPodcastSpotlight =
+                    isLast && (paragraph.toLowerCase().includes("podcast") || paragraph.toLowerCase().includes("on the"));
+
+                  if (isFirst) {
+                    return (
+                      <div
+                        key={i}
+                        className="relative overflow-hidden rounded-2xl border-l-4 border-l-signal-bright border border-steel/18 bg-gradient-to-r from-signal/15 via-ink-3/80 to-ink-3 p-5 shadow-lg"
+                      >
+                        <div className="mb-2 flex items-center gap-2 font-mono text-[10px] font-bold text-signal-bright uppercase tracking-[0.2em]">
+                          <DoodleShield className="h-4 w-4 text-signal-bright" />
+                          <span>Executive Summary</span>
+                        </div>
+                        <p className="text-bone text-[15px] sm:text-[16px] leading-[1.75] font-medium">
+                          {paragraph}
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  if (isPodcastSpotlight) {
+                    return (
+                      <div
+                        key={i}
+                        className="relative rounded-2xl border border-signal-bright/30 bg-gradient-to-br from-signal-bright/12 via-ink-3 to-ink-3 p-5 shadow-xl"
+                      >
+                        <div className="mb-2 flex items-center gap-2 font-mono text-[10px] font-bold text-signal-bright uppercase tracking-[0.22em]">
+                          <DoodleSoundwave className="h-4 w-4 text-signal-bright" stroke="#82c91e" />
+                          <span>On The Security Leader Podcast</span>
+                        </div>
+                        <p className="text-bone text-[14.5px] sm:text-[15px] leading-[1.8] font-normal">
+                          {paragraph}
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={i}
+                      className="rounded-2xl border border-steel/12 bg-ink-3/50 p-4.5 transition-colors hover:border-steel/25"
+                    >
+                      <p className="text-steel-dim text-[14px] sm:text-[15px] leading-[1.82]">
+                        {paragraph}
+                      </p>
+                    </div>
+                  );
+                });
+              })()}
             </div>
 
-            {/* Modal Bottom Bar */}
-            <div className="mt-8 flex items-center justify-between border-t border-steel/15 pt-4">
-              <span className="flex items-center gap-2 font-mono text-[10px] text-steel-dim uppercase tracking-widest">
+            {/* Modal Bottom Footer */}
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-steel/15 pt-5">
+              <span className="flex items-center gap-2 font-mono text-[10px] text-steel-dim uppercase tracking-widest font-semibold">
                 <DoodleShield className="h-4 w-4 text-signal" />
-                SECURITY LEADER PODCAST
+                SECURITY LEADER PODCAST NETWORK
               </span>
               <button
                 type="button"
                 onClick={() => setSelectedMember(null)}
-                className="rounded-full border border-steel/25 px-5 py-2 font-mono text-xs text-bone uppercase tracking-wider transition-colors hover:border-steel hover:bg-ink-3 cursor-pointer"
+                className="rounded-full border border-steel/25 bg-ink-3 px-6 py-2.5 font-mono text-xs font-bold text-bone uppercase tracking-wider transition-all duration-300 hover:border-signal hover:bg-signal/20 cursor-pointer shadow-md"
               >
                 Close Profile
               </button>

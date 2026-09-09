@@ -130,12 +130,31 @@ export async function getContent<K extends ContentKey>(key: K): Promise<SiteCont
       const dbArr = (row.value as any[]) || [];
       const defaultArr = DEFAULTS[key] as any[];
       return dbArr.map((dbItem: any, idx: number) => {
-        const defaultItem = defaultArr.find((d: any) => d.id === dbItem.id || d.name === dbItem.name) || defaultArr[idx] || {};
+        const dbNameLower = (dbItem.name || "").toLowerCase();
+        const dbIdLower = (dbItem.id || "").toLowerCase();
+
+        const defaultItem = defaultArr.find((d: any) => {
+          const dId = (d.id || "").toLowerCase();
+          const dName = (d.name || "").toLowerCase();
+          if (dbIdLower && dId && dbIdLower === dId) return true;
+          if (dbIdLower.includes("oz") && dId.includes("oz")) return true;
+          if (dbIdLower.includes("ken") && dId.includes("ken")) return true;
+          if (dbIdLower.includes("grace") && dId.includes("grace")) return true;
+          if (dbIdLower.includes("katie") && dId.includes("katie")) return true;
+          if (dbNameLower.includes("oz") && dName.includes("oz")) return true;
+          if (dbNameLower.includes("ken") && dName.includes("ken")) return true;
+          if (dbNameLower.includes("grace") && dName.includes("grace")) return true;
+          if (dbNameLower.includes("katie") && dName.includes("katie")) return true;
+          return false;
+        }) || defaultArr[idx] || {};
+
         return {
           ...defaultItem,
           ...dbItem,
-          fullBio: dbItem.fullBio || defaultItem.fullBio || "",
-          linkedinUrl: dbItem.linkedinUrl || defaultItem.linkedinUrl || "",
+          name: defaultItem.name || dbItem.name,
+          role: defaultItem.role || dbItem.role,
+          fullBio: defaultItem.fullBio || dbItem.fullBio || "",
+          linkedinUrl: defaultItem.linkedinUrl || dbItem.linkedinUrl || "",
         };
       }) as unknown as SiteContent[K];
     }
