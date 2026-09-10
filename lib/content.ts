@@ -151,10 +151,16 @@ export async function getContent<K extends ContentKey>(key: K): Promise<SiteCont
         return {
           ...defaultItem,
           ...dbItem,
-          name: defaultItem.name || dbItem.name,
-          role: defaultItem.role || dbItem.role,
-          fullBio: defaultItem.fullBio || dbItem.fullBio || "",
-          linkedinUrl: defaultItem.linkedinUrl || dbItem.linkedinUrl || "",
+          id: dbItem.id || defaultItem.id || `member-${idx}`,
+          name: dbItem.name || defaultItem.name || "",
+          role: dbItem.role || defaultItem.role || "",
+          bio: dbItem.bio || defaultItem.bio || "",
+          fullBio: dbItem.fullBio || defaultItem.fullBio || "",
+          linkedinUrl: dbItem.linkedinUrl || defaultItem.linkedinUrl || "",
+          photo: dbItem.photo || defaultItem.photo || "",
+          tag: dbItem.tag || defaultItem.tag || "HOST",
+          objectPosition: dbItem.objectPosition || defaultItem.objectPosition || "50% 15%",
+          zoom: dbItem.zoom ?? defaultItem.zoom ?? 100,
         };
       }) as unknown as SiteContent[K];
     }

@@ -14,6 +14,11 @@ const nullable = (fd: FormData, k: string) => str(fd, k) || null;
 
 function refreshPublic() {
   revalidatePath("/", "layout");
+  revalidatePath("/");
+  revalidatePath("/about");
+  revalidatePath("/episodes");
+  revalidatePath("/contact");
+  revalidatePath("/admin/content");
 }
 
 /* ------------------------------- auth ------------------------------- */
