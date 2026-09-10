@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Tilt3D } from "./Tilt3D";
 import { DoodleShield, DoodleMic, DoodleLock, DoodleHeadphones, DoodleKey, DoodleRadar } from "./DoodleIcons";
 
@@ -15,24 +15,106 @@ const DOODLE_LIST = [DoodleShield, DoodleMic, DoodleLock, DoodleHeadphones, Dood
 export function TopicsRail({ topics }: { topics: Topic[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const startX = useRef(0);
+  const scrollLeftStart = useRef(0);
+
+  const updateScrollState = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const current = el.scrollLeft;
+    setProgress(max > 0 ? current / max : 0);
+    setCanScrollLeft(current > 5);
+    setCanScrollRight(max > 0 && current < max - 5);
+  }, []);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    updateScrollState();
+
     const onScroll = () => {
-      const max = el.scrollWidth - el.clientWidth;
-      setProgress(max > 0 ? el.scrollLeft / max : 0);
+      updateScrollState();
     };
-    onScroll();
+
+    // Wheel event handler to translate vertical mouse wheel scroll to horizontal scroll
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        const maxScroll = el.scrollWidth - el.clientWidth;
+        if (maxScroll <= 0) return;
+
+        const scrollingRight = e.deltaY > 0;
+        const canScroll = scrollingRight ? el.scrollLeft < maxScroll - 1 : el.scrollLeft > 1;
+
+        if (canScroll) {
+          e.preventDefault();
+          el.scrollLeft += e.deltaY * 1.2;
+        }
+      }
+    };
+
     el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+    el.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("resize", updateScrollState);
+
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      el.removeEventListener("wheel", onWheel);
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, [updateScrollState]);
+
+  const scroll = (direction: "left" | "right") => {
+    const el = ref.current;
+    if (!el) return;
+    const step = Math.max(320, Math.floor(el.clientWidth * 0.75));
+    const targetLeft = direction === "left"
+      ? Math.max(0, el.scrollLeft - step)
+      : Math.min(el.scrollWidth - el.clientWidth, el.scrollLeft + step);
+
+    el.scrollTo({
+      left: targetLeft,
+      behavior: "smooth",
+    });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    setIsDragging(true);
+    startX.current = e.pageX - el.offsetLeft;
+    scrollLeftStart.current = el.scrollLeft;
+  };
+
+  const handleMouseLeaveOrUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const el = ref.current;
+    if (!el) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startX.current) * 1.5;
+    el.scrollLeft = scrollLeftStart.current - walk;
+  };
 
   return (
     <div>
       <div
         ref={ref}
-        className="no-scrollbar -mx-[clamp(18px,4vw,56px)] flex snap-x snap-mandatory gap-5 overflow-x-auto px-[clamp(18px,4vw,56px)] pb-4 pt-2"
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeaveOrUp}
+        onMouseUp={handleMouseLeaveOrUp}
+        onMouseMove={handleMouseMove}
+        className={`no-scrollbar -mx-[clamp(18px,4vw,56px)] flex snap-x snap-mandatory gap-5 overflow-x-auto px-[clamp(18px,4vw,56px)] pb-4 pt-2 cursor-grab active:cursor-grabbing select-none ${
+          isDragging ? "snap-none" : ""
+        }`}
       >
         {topics.map((t, i) => {
           const Icon = DOODLE_LIST[i % DOODLE_LIST.length];
@@ -75,10 +157,29 @@ export function TopicsRail({ topics }: { topics: Topic[] }) {
             style={{ width: `${Math.max(15, progress * 100)}%` }}
           />
         </div>
+
         <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.18em] text-steel-dim uppercase shrink-0">
-          <span className="inline-block animate-pulse text-signal-bright">←</span>
-          <span>Scroll horizontally to explore topics</span>
-          <span className="inline-block animate-pulse text-signal-bright">→</span>
+          <button
+            type="button"
+            onClick={() => scroll("left")}
+            aria-label="Scroll left"
+            title="Scroll left"
+            className="inline-flex items-center justify-center p-2 text-signal-bright hover:scale-125 hover:text-white active:scale-90 cursor-pointer transition-transform"
+          >
+            <span className="inline-block animate-pulse text-sm">←</span>
+          </button>
+
+          <span className="select-none px-1">Scroll horizontally to explore topics</span>
+
+          <button
+            type="button"
+            onClick={() => scroll("right")}
+            aria-label="Scroll right"
+            title="Scroll right"
+            className="inline-flex items-center justify-center p-2 text-signal-bright hover:scale-125 hover:text-white active:scale-90 cursor-pointer transition-transform"
+          >
+            <span className="inline-block animate-pulse text-sm">→</span>
+          </button>
         </div>
       </div>
     </div>
