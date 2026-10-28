@@ -25,7 +25,7 @@ function toCard(ep: PublicEpisode): EpisodeCardData {
 }
 
 export default async function HomePage() {
-  const [hero, about, topics, contact, members, featuredRaw, allRaw] = await Promise.all([
+  const [hero, about, topics, contact, members, featuredRaw, allRaw, slideshow] = await Promise.all([
     getContent("hero"),
     getContent("about"),
     getContent("topics"),
@@ -33,6 +33,7 @@ export default async function HomePage() {
     getContent("members") as Promise<TeamMember[]>,
     getFeatured(),
     getEpisodes(),
+    getContent("slideshow"),
   ]);
 
   const featured = featuredRaw ? toCard(featuredRaw) : null;
@@ -122,7 +123,7 @@ export default async function HomePage() {
       <CDPlayer3D initialTracks={cdTracks} />
 
       {/* ---- Interactive 3D Audio Recording Showcase ---- */}
-      <AudioStudio3D />
+      <AudioStudio3D slides={slideshow as { src: string; alt: string }[]} />
 
       {/* ---- Episodes ---- */}
       <section id="episodes" className="rule px-[clamp(18px,4vw,56px)] py-[clamp(56px,10vh,130px)]">

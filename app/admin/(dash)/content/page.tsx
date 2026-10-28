@@ -3,6 +3,7 @@ import { saveContent } from "@/app/admin/actions";
 import { ActionForm, SubmitButton, Label, inputCls, Panel } from "@/components/admin/ui";
 import { TopicsEditor } from "@/components/admin/TopicsEditor";
 import { MembersEditor } from "@/components/admin/MembersEditor";
+import { SlideshowEditor, type SlideItem } from "@/components/admin/SlideshowEditor";
 import type { TeamMember } from "@/components/TeamShowcase";
 
 export const dynamic = "force-dynamic";
@@ -21,13 +22,14 @@ function Text({ name, label, value, hint, rows }: { name: string; label: string;
 }
 
 export default async function ContentPage() {
-  const [hero, about, topics, contact, seo, members] = await Promise.all([
+  const [hero, about, topics, contact, seo, members, slideshow] = await Promise.all([
     getContent("hero"),
     getContent("about"),
     getContent("topics"),
     getContent("contact"),
     getContent("seo"),
     getContent("members") as Promise<TeamMember[]>,
+    getContent("slideshow") as Promise<SlideItem[]>,
   ]);
 
   return (
@@ -91,6 +93,17 @@ export default async function ContentPage() {
         <Panel title="Team Members & Leadership" description="Manage executive hosts, co-hosts, and team bios shown on the About page and Homepage showcase.">
           <MembersEditor members={members} />
           <div className="mt-6"><SubmitButton>Save team members</SubmitButton></div>
+        </Panel>
+      </ActionForm>
+
+      <ActionForm action={saveContent}>
+        <input type="hidden" name="__key" value="slideshow" />
+        <Panel
+          title="Rotating Character / Studio Slideshow"
+          description="Manage and replace the rotating host & character illustrations shown in the 3D studio on the Homepage and the About page masthead. Upload new photos, adjust order, or remove slides."
+        >
+          <SlideshowEditor initialSlides={slideshow} />
+          <div className="mt-6"><SubmitButton>Save rotating images</SubmitButton></div>
         </Panel>
       </ActionForm>
 

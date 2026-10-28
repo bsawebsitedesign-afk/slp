@@ -207,6 +207,16 @@ export async function saveContent(_prev: ActionState, fd: FormData): Promise<Act
       membersList = [];
     }
     await setContent("members", membersList as SiteContent["members"]);
+  } else if (key === "slideshow") {
+    const raw = str(fd, "slideshow_json");
+    let slidesList = [];
+    try {
+      slidesList = JSON.parse(raw);
+    } catch {
+      slidesList = [];
+    }
+    slidesList = slidesList.filter((s: any) => s && s.src && typeof s.src === "string" && s.src.trim());
+    await setContent("slideshow", slidesList as SiteContent["slideshow"]);
   } else if (key === "topics") {
     const titles = fd.getAll("topicTitle").map(String);
     const bodies = fd.getAll("topicBody").map(String);

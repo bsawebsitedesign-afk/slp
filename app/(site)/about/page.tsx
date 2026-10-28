@@ -33,10 +33,11 @@ function Prose({ text, className = "" }: { text: string; className?: string }) {
 }
 
 export default async function AboutPage() {
-  const [about, contact, members] = await Promise.all([
+  const [about, contact, members, slideshow] = await Promise.all([
     getContent("about"),
     getContent("contact"),
     getContent("members") as Promise<TeamMember[]>,
+    getContent("slideshow"),
   ]);
 
   return (
@@ -61,9 +62,9 @@ export default async function AboutPage() {
             </h1>
           </div>
 
-          {/* Smooth Fading Image Slideshow */}
+          {/* Smooth Fading Image Slideshow — images managed via CMS */}
           <div className="relative flex justify-center lg:justify-end items-center">
-            <AboutImageSlideshow />
+            <AboutImageSlideshow slides={slideshow as { src: string; alt: string }[]} />
           </div>
         </div>
       </section>

@@ -116,6 +116,12 @@ export const DEFAULTS = {
       zoom: 100,
     },
   ],
+  /** About page rotating slideshow images. */
+  slideshow: [
+    { src: "/brand/about-slide-1.webp", alt: "Security Leader Avatar 1" },
+    { src: "/brand/about-slide-2.webp", alt: "Security Leader Avatar 2" },
+    { src: "/brand/about-slide-3.webp", alt: "Security Leader Avatar 3" },
+  ],
 };
 
 export type SiteContent = typeof DEFAULTS;
@@ -126,6 +132,13 @@ export async function getContent<K extends ContentKey>(key: K): Promise<SiteCont
   try {
     const row = await prisma.setting.findUnique({ where: { key } });
     if (!row) return DEFAULTS[key];
+    if (key === "slideshow") {
+      const dbSlides = row.value as any[];
+      if (Array.isArray(dbSlides) && dbSlides.length > 0) {
+        return dbSlides as unknown as SiteContent[K];
+      }
+      return DEFAULTS.slideshow as unknown as SiteContent[K];
+    }
     if (Array.isArray(DEFAULTS[key])) {
       const dbArr = (row.value as any[]) || [];
       const defaultArr = DEFAULTS[key] as any[];

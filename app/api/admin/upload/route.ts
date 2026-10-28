@@ -36,13 +36,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const prefix = ((form.get("prefix") as string | null) || "member").replace(/[^a-z0-9_-]/gi, "");
     const ext = file.type.split("/")[1].replace("jpeg", "jpg");
     const slug = file.name
       .replace(/\.[^.]+$/, "")
       .toLowerCase()
       .replace(/[^a-z0-9]/g, "-")
       .slice(0, 40);
-    const filename = `member-${slug}-${Date.now()}.${ext}`;
+    const filename = `${prefix}-${slug}-${Date.now()}.${ext}`;
 
     const brandDir = path.join(process.cwd(), "public", "brand");
     await mkdir(brandDir, { recursive: true });

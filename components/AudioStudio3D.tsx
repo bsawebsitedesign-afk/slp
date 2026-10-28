@@ -29,17 +29,32 @@ const RECORDING_BARS = [
   { h: 40, delay: 0.22 },
 ];
 
-export function AudioStudio3D() {
+type Slide = { src: string; alt: string };
+
+interface AudioStudio3DProps {
+  slides?: Slide[];
+}
+
+export function AudioStudio3D({ slides }: AudioStudio3DProps = {}) {
+  const activeSlides: Slide[] =
+    slides && slides.length > 0 ? slides : SECTION_SLIDES;
+
   const [isPlaying, setIsPlaying] = useState(true);
   const [seconds, setSeconds] = useState(42);
   const [slideIndex, setSlideIndex] = useState(0);
 
+  // Reset slide index if slides change
   useEffect(() => {
+    setSlideIndex(0);
+  }, [activeSlides.length]);
+
+  useEffect(() => {
+    if (activeSlides.length <= 1) return;
     const timer = setInterval(() => {
-      setSlideIndex((prev) => (prev + 1) % SECTION_SLIDES.length);
+      setSlideIndex((prev) => (prev + 1) % activeSlides.length);
     }, 3600);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeSlides.length]);
 
   const toggleRecording = () => {
     setIsPlaying((prev) => !prev);
@@ -88,8 +103,8 @@ export function AudioStudio3D() {
                 className="absolute inset-0 h-full w-full flex items-center justify-center"
               >
                 <Image
-                  src={SECTION_SLIDES[slideIndex].src}
-                  alt={SECTION_SLIDES[slideIndex].alt}
+                  src={activeSlides[slideIndex]?.src || SECTION_SLIDES[0].src}
+                  alt={activeSlides[slideIndex]?.alt || "Security Leader Character"}
                   fill
                   sizes="(max-width: 640px) 300px, 440px"
                   priority={slideIndex === 0}

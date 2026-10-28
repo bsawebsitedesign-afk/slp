@@ -5,21 +5,39 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { Tilt3D } from "./Tilt3D";
 
-const SLIDES = [
-  { src: "/brand/about-slide-1.webp", alt: "Security Leader Avatar 1" },
-  { src: "/brand/about-slide-2.webp", alt: "Security Leader Avatar 2" },
-  { src: "/brand/about-slide-3.webp", alt: "Security Leader Avatar 3" },
-];
+type Slide = { src: string; alt: string };
 
-export function AboutImageSlideshow() {
+interface AboutImageSlideshowProps {
+  /** Slides from the DB / CMS. Falls back to the 3 original avatar images. */
+  slides?: Slide[];
+}
+
+export function AboutImageSlideshow({ slides }: AboutImageSlideshowProps) {
+  const activeSlides: Slide[] =
+    slides && slides.length > 0
+      ? slides
+      : [
+          { src: "/brand/about-slide-1.webp", alt: "Security Leader Avatar 1" },
+          { src: "/brand/about-slide-2.webp", alt: "Security Leader Avatar 2" },
+          { src: "/brand/about-slide-3.webp", alt: "Security Leader Avatar 3" },
+        ];
+
   const [index, setIndex] = useState(0);
 
+  // Reset index if slides change (e.g. admin removes a slide)
   useEffect(() => {
+    setIndex(0);
+  }, [activeSlides.length]);
+
+  useEffect(() => {
+    if (activeSlides.length <= 1) return;
     const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % SLIDES.length);
+      setIndex((prev) => (prev + 1) % activeSlides.length);
     }, 3800);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeSlides.length]);
+
+  const currentSlide = activeSlides[index] || activeSlides[0];
 
   return (
     <div className="relative flex flex-col items-center justify-center">
@@ -43,8 +61,8 @@ export function AboutImageSlideshow() {
                 className="absolute inset-0 h-full w-full"
               >
                 <Image
-                  src={SLIDES[index].src}
-                  alt={SLIDES[index].alt}
+                  src={currentSlide.src}
+                  alt={currentSlide.alt}
                   fill
                   priority={index === 0}
                   sizes="(max-width: 640px) 300px, 380px"
@@ -56,22 +74,24 @@ export function AboutImageSlideshow() {
         </div>
       </Tilt3D>
 
-      {/* Slide Navigation Dots */}
-      <div className="relative z-20 mt-4 flex items-center gap-2.5">
-        {SLIDES.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => setIndex(i)}
-            aria-label={`Go to slide ${i + 1}`}
-            className={`h-2.5 rounded-full transition-all duration-500 cursor-pointer ${
-              i === index
-                ? "w-8 bg-signal-bright shadow-[0_0_12px_rgba(130,201,30,0.8)]"
-                : "w-2.5 bg-steel/30 hover:bg-steel/60"
-            }`}
-          />
-        ))}
-      </div>
+      {/* Slide Navigation Dots — only show if more than 1 slide */}
+      {activeSlides.length > 1 && (
+        <div className="relative z-20 mt-4 flex items-center gap-2.5">
+          {activeSlides.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setIndex(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className={`h-2.5 rounded-full transition-all duration-500 cursor-pointer ${
+                i === index
+                  ? "w-8 bg-signal-bright shadow-[0_0_12px_rgba(130,201,30,0.8)]"
+                  : "w-2.5 bg-steel/30 hover:bg-steel/60"
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
