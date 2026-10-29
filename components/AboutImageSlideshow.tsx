@@ -64,6 +64,7 @@ export function AboutImageSlideshow({ slides }: AboutImageSlideshowProps) {
                   src={currentSlide.src}
                   alt={currentSlide.alt}
                   fill
+                  unoptimized
                   priority={index === 0}
                   sizes="(max-width: 640px) 300px, 380px"
                   className="object-contain"

@@ -106,6 +106,7 @@ export function AudioStudio3D({ slides }: AudioStudio3DProps = {}) {
                   src={activeSlides[slideIndex]?.src || SECTION_SLIDES[0].src}
                   alt={activeSlides[slideIndex]?.alt || "Security Leader Character"}
                   fill
+                  unoptimized
                   sizes="(max-width: 640px) 300px, 440px"
                   priority={slideIndex === 0}
                   className="object-contain transition-transform duration-700 hover:scale-105"

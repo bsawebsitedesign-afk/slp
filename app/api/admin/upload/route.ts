@@ -45,14 +45,22 @@ export async function POST(req: NextRequest) {
       .slice(0, 40);
     const filename = `${prefix}-${slug}-${Date.now()}.${ext}`;
 
-    const brandDir = path.join(process.cwd(), "public", "brand");
-    await mkdir(brandDir, { recursive: true });
-
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(brandDir, filename), buffer);
 
-    const publicPath = `/brand/${filename}`;
-    return NextResponse.json({ path: publicPath });
+    try {
+      const brandDir = path.join(process.cwd(), "public", "brand");
+      await mkdir(brandDir, { recursive: true });
+      await writeFile(path.join(brandDir, filename), buffer);
+      return NextResponse.json({ path: `/brand/${filename}` });
+    } catch (fsErr) {
+      // In serverless environments (like Vercel production) where the local filesystem is read-only,
+      // fallback to self-contained base64 Data URI so uploads work out-of-the-box.
+      console.warn("[upload] Filesystem write failed, falling back to base64 Data URI:", fsErr);
+      const mime = file.type || "image/jpeg";
+      const base64 = buffer.toString("base64");
+      const dataUrl = `data:${mime};base64,${base64}`;
+      return NextResponse.json({ path: dataUrl });
+    }
   } catch (err) {
     console.error("[upload] Error:", err);
     return NextResponse.json({ error: "Upload failed. Please try again." }, { status: 500 });
