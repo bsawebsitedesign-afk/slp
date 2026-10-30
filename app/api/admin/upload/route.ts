@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { requireAdmin } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
 const MAX_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB
@@ -46,21 +47,26 @@ export async function POST(req: NextRequest) {
     const filename = `${prefix}-${slug}-${Date.now()}.${ext}`;
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    const mime = file.type || "image/jpeg";
+    const base64 = buffer.toString("base64");
 
+    // 1. Persist image in database so it works permanently on Vercel across redeployments
+    await prisma.setting.upsert({
+      where: { key: `media:${filename}` },
+      create: { key: `media:${filename}`, value: { mime, data: base64 } },
+      update: { value: { mime, data: base64 } },
+    });
+
+    // 2. Also save to local public/brand directory if writable (e.g. local development)
     try {
       const brandDir = path.join(process.cwd(), "public", "brand");
       await mkdir(brandDir, { recursive: true });
       await writeFile(path.join(brandDir, filename), buffer);
-      return NextResponse.json({ path: `/brand/${filename}` });
-    } catch (fsErr) {
-      // In serverless environments (like Vercel production) where the local filesystem is read-only,
-      // fallback to self-contained base64 Data URI so uploads work out-of-the-box.
-      console.warn("[upload] Filesystem write failed, falling back to base64 Data URI:", fsErr);
-      const mime = file.type || "image/jpeg";
-      const base64 = buffer.toString("base64");
-      const dataUrl = `data:${mime};base64,${base64}`;
-      return NextResponse.json({ path: dataUrl });
+    } catch {
+      // Normal and expected on read-only serverless filesystems (e.g. Vercel)
     }
+
+    return NextResponse.json({ path: `/api/media/${filename}` });
   } catch (err) {
     console.error("[upload] Error:", err);
     return NextResponse.json({ error: "Upload failed. Please try again." }, { status: 500 });

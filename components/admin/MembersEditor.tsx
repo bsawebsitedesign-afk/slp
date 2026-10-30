@@ -327,6 +327,50 @@ export function MembersEditor({ members: initial }: { members: TeamMember[] }) {
 
 type UploadState = "idle" | "uploading" | "done" | "error";
 
+async function compressImage(file: File, maxDim = 1200, quality = 0.85): Promise<File> {
+  if (!file.type.startsWith("image/") || file.type === "image/gif" || file.type === "image/svg+xml") {
+    return file;
+  }
+  return new Promise((resolve) => {
+    const img = document.createElement("img");
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return resolve(file);
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const outType = file.type === "image/png" ? "image/png" : "image/jpeg";
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return resolve(file);
+          const compressed = new File([blob], file.name.replace(/\.[^.]+$/, outType === "image/png" ? ".png" : ".jpg"), {
+            type: outType,
+          });
+          resolve(compressed);
+        },
+        outType,
+        quality
+      );
+    };
+    img.onerror = () => resolve(file);
+    img.src = url;
+  });
+}
+
 function PhotoUploader({
   currentPhoto,
   memberName,
@@ -347,18 +391,15 @@ function PhotoUploader({
       setUploadState("error");
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      setUploadError("File too large — max 8 MB.");
-      setUploadState("error");
-      return;
-    }
 
     setUploadState("uploading");
     setUploadError("");
 
     try {
+      const optimizedFile = await compressImage(file);
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", optimizedFile);
+      fd.append("prefix", "member");
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
       const json = await res.json();
 

@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   serverExternalPackages: ["pg", "@prisma/adapter-pg"],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
+  },
   poweredByHeader: false,
   async headers() {
     return [

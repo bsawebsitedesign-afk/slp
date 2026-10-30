@@ -63,7 +63,11 @@ export async function logout() {
 
 /** Any admin edit locks the row so the next YouTube sync won't overwrite it. */
 export async function saveEpisode(_prev: ActionState, fd: FormData): Promise<ActionState> {
-  await requireAdmin();
+  try {
+    await requireAdmin();
+  } catch {
+    return { error: "Session expired. Please log in again to save changes." };
+  }
   const id = str(fd, "id");
 
   const videoId = parseVideoId(str(fd, "youtubeId"));
@@ -195,55 +199,112 @@ export async function runSync(): Promise<void> {
 /* ------------------------------ content ------------------------------ */
 
 export async function saveContent(_prev: ActionState, fd: FormData): Promise<ActionState> {
-  await requireAdmin();
-  const key = str(fd, "__key") as ContentKey;
-
-  if (key === "members") {
-    const raw = str(fd, "members_json");
-    let membersList = [];
-    try {
-      membersList = JSON.parse(raw);
-    } catch {
-      membersList = [];
-    }
-    await setContent("members", membersList as SiteContent["members"]);
-  } else if (key === "slideshow") {
-    const raw = str(fd, "slideshow_json");
-    let slidesList = [];
-    try {
-      slidesList = JSON.parse(raw);
-    } catch {
-      slidesList = [];
-    }
-    slidesList = slidesList.filter((s: any) => s && s.src && typeof s.src === "string" && s.src.trim());
-    await setContent("slideshow", slidesList as SiteContent["slideshow"]);
-  } else if (key === "topics") {
-    const titles = fd.getAll("topicTitle").map(String);
-    const bodies = fd.getAll("topicBody").map(String);
-    const topics = titles
-      .map((t, i) => ({ title: t.trim(), body: (bodies[i] ?? "").trim() }))
-      .filter((t) => t.title);
-    await setContent("topics", topics as SiteContent["topics"]);
-  } else if (key === "contact") {
-    const value: Record<string, unknown> = {};
-    for (const [k, v] of fd.entries()) {
-      if (k.startsWith("__")) continue;
-      value[k] = String(v);
-    }
-    value.prompts = str(fd, "prompts").split("\n").map((s) => s.trim()).filter(Boolean);
-    await setContent("contact", value as SiteContent["contact"]);
-  } else {
-    const value: Record<string, string> = {};
-    for (const [k, v] of fd.entries()) {
-      if (k.startsWith("__")) continue;
-      value[k] = String(v);
-    }
-    await setContent(key, value as never);
+  try {
+    await requireAdmin();
+  } catch {
+    return { error: "Session expired. Please log in again to save changes." };
   }
 
-  refreshPublic();
-  revalidatePath("/admin/content");
-  return { ok: "Saved." };
+  try {
+    const key = str(fd, "__key") as ContentKey;
+    if (!key) return { error: "Missing content key." };
+
+    if (key === "members") {
+      const raw = str(fd, "members_json");
+      let membersList: any[] = [];
+      try {
+        membersList = JSON.parse(raw);
+      } catch {
+        membersList = [];
+      }
+
+      // Automatically offload any inline base64 images to database media storage so the document payload stays tiny
+      for (let i = 0; i < membersList.length; i++) {
+        const m = membersList[i];
+        if (m && m.photo && typeof m.photo === "string" && m.photo.startsWith("data:")) {
+          try {
+            const [header, base64] = m.photo.split(",");
+            const mimeMatch = header.match(/:(.*?);/);
+            const mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
+            const ext = mime.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+            const filename = `member-${m.id || i}-${Date.now()}.${ext}`;
+            await prisma.setting.upsert({
+              where: { key: `media:${filename}` },
+              create: { key: `media:${filename}`, value: { mime, data: base64 } },
+              update: { value: { mime, data: base64 } },
+            });
+            m.photo = `/api/media/${filename}`;
+          } catch (offloadErr) {
+            console.warn("[saveContent] Failed to offload base64 photo:", offloadErr);
+          }
+        }
+      }
+
+      await setContent("members", membersList as SiteContent["members"]);
+    } else if (key === "slideshow") {
+      const raw = str(fd, "slideshow_json");
+      let slidesList: any[] = [];
+      try {
+        slidesList = JSON.parse(raw);
+      } catch {
+        slidesList = [];
+      }
+      slidesList = slidesList.filter((s: any) => s && s.src && typeof s.src === "string" && s.src.trim());
+
+      // Offload any inline base64 slides to database media storage
+      for (let i = 0; i < slidesList.length; i++) {
+        const s = slidesList[i];
+        if (s && s.src && typeof s.src === "string" && s.src.startsWith("data:")) {
+          try {
+            const [header, base64] = s.src.split(",");
+            const mimeMatch = header.match(/:(.*?);/);
+            const mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
+            const ext = mime.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+            const filename = `slide-${i}-${Date.now()}.${ext}`;
+            await prisma.setting.upsert({
+              where: { key: `media:${filename}` },
+              create: { key: `media:${filename}`, value: { mime, data: base64 } },
+              update: { value: { mime, data: base64 } },
+            });
+            s.src = `/api/media/${filename}`;
+          } catch (offloadErr) {
+            console.warn("[saveContent] Failed to offload base64 slide:", offloadErr);
+          }
+        }
+      }
+
+      await setContent("slideshow", slidesList as SiteContent["slideshow"]);
+    } else if (key === "topics") {
+      const titles = fd.getAll("topicTitle").map(String);
+      const bodies = fd.getAll("topicBody").map(String);
+      const topics = titles
+        .map((t, i) => ({ title: t.trim(), body: (bodies[i] ?? "").trim() }))
+        .filter((t) => t.title);
+      await setContent("topics", topics as SiteContent["topics"]);
+    } else if (key === "contact") {
+      const value: Record<string, unknown> = {};
+      for (const [k, v] of fd.entries()) {
+        if (k.startsWith("__")) continue;
+        value[k] = String(v);
+      }
+      value.prompts = str(fd, "prompts").split("\n").map((s) => s.trim()).filter(Boolean);
+      await setContent("contact", value as SiteContent["contact"]);
+    } else {
+      const value: Record<string, string> = {};
+      for (const [k, v] of fd.entries()) {
+        if (k.startsWith("__")) continue;
+        value[k] = String(v);
+      }
+      await setContent(key, value as never);
+    }
+
+    refreshPublic();
+    revalidatePath("/admin/content");
+    return { ok: "Saved successfully." };
+  } catch (err: any) {
+    console.error("[saveContent] Error:", err);
+    return { error: err?.message || "Failed to save content. Please try again." };
+  }
 }
 
 /* ------------------------------ messages ------------------------------ */
