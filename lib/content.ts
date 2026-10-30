@@ -159,18 +159,16 @@ export async function getContent<K extends ContentKey>(key: K): Promise<SiteCont
           if (dbNameLower.includes("grace") && dName.includes("grace")) return true;
           if (dbNameLower.includes("katie") && dName.includes("katie")) return true;
           return false;
-        }) || defaultArr[idx] || {};
+        }) || {};
 
         return {
-          ...defaultItem,
-          ...dbItem,
           id: dbItem.id || defaultItem.id || `member-${idx}`,
-          name: dbItem.name || defaultItem.name || "",
-          role: dbItem.role || defaultItem.role || "",
-          bio: dbItem.bio || defaultItem.bio || "",
-          fullBio: dbItem.fullBio || defaultItem.fullBio || "",
-          linkedinUrl: dbItem.linkedinUrl || defaultItem.linkedinUrl || "",
-          photo: dbItem.photo || defaultItem.photo || "",
+          name: dbItem.name !== undefined ? dbItem.name : (defaultItem.name || ""),
+          role: dbItem.role !== undefined ? dbItem.role : (defaultItem.role || ""),
+          bio: dbItem.bio !== undefined ? dbItem.bio : (defaultItem.bio || ""),
+          fullBio: dbItem.fullBio !== undefined ? dbItem.fullBio : (defaultItem.fullBio || ""),
+          linkedinUrl: dbItem.linkedinUrl !== undefined ? dbItem.linkedinUrl : (defaultItem.linkedinUrl || ""),
+          photo: dbItem.photo || defaultItem.photo || "/brand/member1.webp",
           tag: dbItem.tag || defaultItem.tag || "HOST",
           objectPosition: dbItem.objectPosition || defaultItem.objectPosition || "50% 15%",
           zoom: dbItem.zoom ?? defaultItem.zoom ?? 100,

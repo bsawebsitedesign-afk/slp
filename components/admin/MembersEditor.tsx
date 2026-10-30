@@ -20,16 +20,30 @@ export function MembersEditor({ members: initial }: { members: TeamMember[] }) {
     setMembers((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  const move = (idx: number, dir: -1 | 1) => {
+    const targetIdx = idx + dir;
+    if (targetIdx < 0 || targetIdx >= members.length) return;
+    setMembers((prev) => {
+      const copy = [...prev];
+      const temp = copy[idx];
+      copy[idx] = copy[targetIdx];
+      copy[targetIdx] = temp;
+      return copy;
+    });
+  };
+
   const add = () => {
     setMembers((prev) => [
       ...prev,
       {
         id: `member-${Date.now()}`,
-        name: "New Team Member",
-        role: "Host / Producer",
+        name: "",
+        role: "",
         tag: "Host",
-        photo: "/brand/member1.webp",
-        bio: "Team member description...",
+        photo: "",
+        bio: "",
+        fullBio: "",
+        linkedinUrl: "",
         objectPosition: "50% 15%",
         zoom: 100,
       },
@@ -39,6 +53,26 @@ export function MembersEditor({ members: initial }: { members: TeamMember[] }) {
   return (
     <div className="flex flex-col gap-6">
       <input type="hidden" name="members_json" value={JSON.stringify(members)} />
+
+      {/* Top Controls Header */}
+      <div className="flex items-center justify-between rounded-2xl border border-steel/20 bg-ink-3/40 px-5 py-3.5">
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-xs uppercase tracking-wider text-signal-bright font-bold">
+            Team Members
+          </span>
+          <span className="text-steel-dim/50">·</span>
+          <span className="font-mono text-xs text-bone">
+            Total Members: <strong className="text-signal-bright">{members.length}</strong>
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={add}
+          className="rounded-full bg-signal-bright px-4 py-1.5 font-mono text-xs font-bold text-ink hover:bg-signal transition-all cursor-pointer shadow-md"
+        >
+          + Add New Team Member
+        </button>
+      </div>
 
       {members.map((m, idx) => {
         const currentPos = m.objectPosition || "50% 15%";
@@ -53,16 +87,43 @@ export function MembersEditor({ members: initial }: { members: TeamMember[] }) {
 
             {/* Header Bar */}
             <div className="flex items-center justify-between border-b border-steel/15 pb-3">
-              <span className="font-mono text-xs text-signal-bright uppercase tracking-wider font-bold">
-                Team Member #{idx + 1}: {m.name || "Untitled"}
-              </span>
-              <button
-                type="button"
-                onClick={() => remove(idx)}
-                className="font-mono text-[11px] text-red-400 hover:text-red-300 uppercase tracking-widest cursor-pointer"
-              >
-                ✕ Remove
-              </button>
+              <div className="flex items-center gap-2.5">
+                <span className="font-mono text-xs text-signal-bright uppercase tracking-wider font-bold">
+                  Team Member #{idx + 1}: {m.name || "Untitled Member"}
+                </span>
+                {m.tag && (
+                  <span className="rounded bg-ink/80 px-2 py-0.5 font-mono text-[9px] text-signal uppercase border border-steel/20">
+                    {m.tag}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={idx === 0}
+                  onClick={() => move(idx, -1)}
+                  title="Move Up"
+                  className="rounded px-2.5 py-1 font-mono text-xs text-steel hover:text-bone disabled:opacity-30 disabled:hover:text-steel cursor-pointer"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  disabled={idx === members.length - 1}
+                  onClick={() => move(idx, 1)}
+                  title="Move Down"
+                  className="rounded px-2.5 py-1 font-mono text-xs text-steel hover:text-bone disabled:opacity-30 disabled:hover:text-steel cursor-pointer"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  onClick={() => remove(idx)}
+                  className="font-mono text-[11px] text-red-400 hover:text-red-300 uppercase tracking-widest cursor-pointer ml-2"
+                >
+                  ✕ Remove
+                </button>
+              </div>
             </div>
 
             {/* Grid Layout: Controls on Left, Live Card Preview on Right */}
@@ -252,9 +313,9 @@ export function MembersEditor({ members: initial }: { members: TeamMember[] }) {
       <button
         type="button"
         onClick={add}
-        className="self-start rounded-full border border-steel/25 bg-ink-2 px-5 py-2.5 font-mono text-xs tracking-wider text-bone uppercase hover:border-steel cursor-pointer transition-colors"
+        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-steel/30 py-5 font-mono text-xs uppercase tracking-widest text-steel hover:border-signal/60 hover:bg-signal/5 hover:text-bone transition-all duration-200 cursor-pointer"
       >
-        + Add Team Member
+        + Add Another Team Member
       </button>
     </div>
   );
