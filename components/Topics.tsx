@@ -120,7 +120,7 @@ export function TopicsRail({ topics }: { topics: Topic[] }) {
           const Icon = DOODLE_LIST[i % DOODLE_LIST.length];
           return (
             <Tilt3D
-              key={t.title}
+              key={t.title || `topic-${i}`}
               maxTilt={12}
               scale={1.03}
               className="w-[78vw] shrink-0 snap-start sm:w-[46vw] lg:w-[clamp(300px,25vw,380px)]"

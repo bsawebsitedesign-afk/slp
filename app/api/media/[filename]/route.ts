@@ -63,3 +63,4 @@ export async function GET(
     return new NextResponse("Error serving image", { status: 500 });
   }
 }
+

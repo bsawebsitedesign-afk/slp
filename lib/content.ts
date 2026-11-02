@@ -132,6 +132,8 @@ export async function getContent<K extends ContentKey>(key: K): Promise<SiteCont
   try {
     const row = await prisma.setting.findUnique({ where: { key } });
     if (!row) return DEFAULTS[key];
+
+    // 1. Rotating Slideshow (must return { src, alt }[])
     if (key === "slideshow") {
       const dbSlides = row.value as any[];
       if (Array.isArray(dbSlides) && dbSlides.length > 0) {
@@ -139,9 +141,32 @@ export async function getContent<K extends ContentKey>(key: K): Promise<SiteCont
       }
       return DEFAULTS.slideshow as unknown as SiteContent[K];
     }
-    if (Array.isArray(DEFAULTS[key])) {
+
+    // 2. Topics (Strict isolation: must return { title, body }[] and never member fields)
+    if (key === "topics") {
+      const dbTopics = row.value as any[];
+      if (Array.isArray(dbTopics) && dbTopics.length > 0) {
+        const cleaned = dbTopics
+          .map((t: any) => ({
+            title: typeof t?.title === "string" ? t.title.trim() : "",
+            body: typeof t?.body === "string" ? t.body.trim() : "",
+          }))
+          .filter((t) => t.title);
+        if (cleaned.length > 0) {
+          return cleaned as unknown as SiteContent[K];
+        }
+      }
+      // If DB has empty array or corrupted data, always fall back to pristine DEFAULTS.topics
+      return DEFAULTS.topics as unknown as SiteContent[K];
+    }
+
+    // 3. Team Members (Only runs for key === "members")
+    if (key === "members") {
       const dbArr = (row.value as any[]) || [];
-      const defaultArr = DEFAULTS[key] as any[];
+      if (!Array.isArray(dbArr) || dbArr.length === 0) {
+        return DEFAULTS.members as unknown as SiteContent[K];
+      }
+      const defaultArr = DEFAULTS.members;
       return dbArr.map((dbItem: any, idx: number) => {
         const dbNameLower = (dbItem.name || "").toLowerCase();
         const dbIdLower = (dbItem.id || "").toLowerCase();
@@ -175,6 +200,20 @@ export async function getContent<K extends ContentKey>(key: K): Promise<SiteCont
         };
       }) as unknown as SiteContent[K];
     }
+
+    // 4. Contact
+    if (key === "contact") {
+      const dbContact = (row.value as any) || {};
+      return {
+        ...DEFAULTS.contact,
+        ...dbContact,
+        prompts: Array.isArray(dbContact.prompts) && dbContact.prompts.length > 0
+          ? dbContact.prompts
+          : DEFAULTS.contact.prompts,
+      } as SiteContent[K];
+    }
+
+    // 5. Default objects: hero, about, seo
     return ({ ...DEFAULTS[key], ...(row.value as object) } as SiteContent[K]);
   } catch (e) {
     console.warn(`[getContent] Database lookup failed for key "${key}", falling back to DEFAULTS.`, e);
