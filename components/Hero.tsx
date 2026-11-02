@@ -264,7 +264,7 @@ export function Hero({ content, latest }: { content: HeroContent; latest: Latest
       <div className="shell relative flex w-full flex-col gap-[clamp(18px,3vh,36px)] px-0 z-10">
         
         {/* Main Hero 2-Column Layout */}
-        <div className="grid items-center gap-[clamp(30px,4vw,64px)] lg:grid-cols-[1fr_440px] xl:grid-cols-[1fr_500px]">
+        <div className="grid items-center gap-[clamp(30px,4vw,64px)] lg:grid-cols-[1fr_480px] xl:grid-cols-[1fr_540px]">
           
           {/* Left Column: Eyebrow, Headlines, Intro, CTAs */}
           <div className="flex flex-col gap-[clamp(18px,3vh,36px)]">
@@ -343,25 +343,25 @@ export function Hero({ content, latest }: { content: HeroContent; latest: Latest
 
             {/* Floating Security Doodle Badge 2 (Bottom Right) */}
             <div
-              className="hero-rise absolute -bottom-4 -right-4 z-30 hidden lg:block"
+              className="hero-rise absolute -bottom-3 -right-2 z-30 hidden sm:block"
               style={{ animationDelay: "1.3s" }}
             >
-              <div className="flex items-center gap-2 rounded-full border border-steel/25 bg-ink-3/95 px-4.5 py-2.5 shadow-2xl backdrop-blur-xl font-mono text-xs font-bold text-signal-bright">
-                <DoodleHeadphones className="h-4.5 w-4.5" stroke="#82c91e" />
+              <div className="flex items-center gap-2 rounded-full border border-steel/25 bg-ink-3/95 px-4 py-2 shadow-2xl backdrop-blur-xl font-mono text-[11px] font-bold text-signal-bright">
+                <DoodleHeadphones className="h-4 w-4" stroke="#82c91e" />
                 <span>Executive CISO Audio</span>
               </div>
             </div>
 
             {/* 3D Tilt Main Artwork */}
-            <Tilt3D maxTilt={14} scale={1.04} className="relative flex items-center justify-center">
-              <div className="relative z-10 aspect-square w-[min(62vw,240px)] lg:w-[520px] xl:w-[600px] drop-shadow-[0_30px_60px_rgba(0,0,0,0.95)] transition-transform duration-700 hover:scale-105">
+            <Tilt3D maxTilt={10} scale={1.03} className="relative flex items-center justify-center w-full">
+              <div className="relative z-10 aspect-[1024/438] w-full max-w-[540px] overflow-hidden rounded-2xl sm:rounded-3xl border border-steel/20 bg-ink-2/80 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.85)] ring-1 ring-white/10 backdrop-blur-sm transition-transform duration-700 hover:scale-[1.02]">
                 <Image
-                  src="/brand/hero-real-new.webp"
-                  alt="Security Leader Podcast Artwork"
+                  src="/brand/hero-hosts-studio.jpg"
+                  alt="Security Leader Podcast Studio Artwork"
                   fill
-                  sizes="(max-width: 1024px) 240px, (max-width: 1280px) 520px, 600px"
+                  sizes="(max-width: 1024px) 100vw, 540px"
                   priority
-                  className="object-contain"
+                  className="object-cover"
                 />
               </div>
             </Tilt3D>
