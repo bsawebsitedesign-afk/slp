@@ -151,12 +151,17 @@ export async function getContent<K extends ContentKey>(key: K): Promise<SiteCont
             title: typeof t?.title === "string" ? t.title.trim() : "",
             body: typeof t?.body === "string" ? t.body.trim() : "",
           }))
-          .filter((t) => t.title);
-        if (cleaned.length > 0) {
+          .filter((t) => t.title && t.body);
+        if (cleaned.length >= 3) {
           return cleaned as unknown as SiteContent[K];
         }
       }
-      // If DB has empty array or corrupted data, always fall back to pristine DEFAULTS.topics
+      // If DB has incomplete/corrupted test data, heal the DB row with original DEFAULTS.topics
+      prisma.setting.upsert({
+        where: { key: "topics" },
+        create: { key: "topics", value: DEFAULTS.topics },
+        update: { value: DEFAULTS.topics },
+      }).catch(() => {});
       return DEFAULTS.topics as unknown as SiteContent[K];
     }
 

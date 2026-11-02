@@ -30,9 +30,11 @@ export function TopicsRail({ topics }: { topics: Topic[] }) {
   const startX = useRef(0);
   const scrollLeftStart = useRef(0);
 
-  // Guarantee we NEVER render empty/blank cards
-  const validTopics = (topics || []).filter((t) => t && typeof t.title === "string" && t.title.trim().length > 0);
-  const displayTopics = validTopics.length > 0 ? validTopics : DEFAULT_TOPICS_FALLBACK;
+  // Guarantee we render valid topics with descriptions, otherwise fall back to the original 6 topics
+  const validTopics = (topics || []).filter(
+    (t) => t && typeof t.title === "string" && t.title.trim().length > 0 && typeof t.body === "string" && t.body.trim().length > 0
+  );
+  const displayTopics = validTopics.length >= 3 ? validTopics : DEFAULT_TOPICS_FALLBACK;
 
   const updateScrollState = useCallback(() => {
     const el = ref.current;

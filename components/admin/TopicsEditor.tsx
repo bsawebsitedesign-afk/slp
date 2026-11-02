@@ -16,18 +16,26 @@ const DEFAULT_TOPICS: Topic[] = [
 
 export function TopicsEditor({ topics }: { topics: Topic[] }) {
   const getInitial = () => {
-    const valid = (topics || []).filter((t) => t && typeof t.title === "string" && t.title.trim().length > 0);
-    return valid.length > 0 ? valid : DEFAULT_TOPICS;
+    const valid = (topics || []).filter(
+      (t) => t && typeof t.title === "string" && t.title.trim().length > 0 && typeof t.body === "string" && t.body.trim().length > 0
+    );
+    return valid.length >= 3 ? valid : DEFAULT_TOPICS;
   };
 
   const [rows, setRows] = useState<Topic[]>(getInitial);
 
   useEffect(() => {
-    const valid = (topics || []).filter((t) => t && typeof t.title === "string" && t.title.trim().length > 0);
-    if (valid.length > 0) {
+    const valid = (topics || []).filter(
+      (t) => t && typeof t.title === "string" && t.title.trim().length > 0 && typeof t.body === "string" && t.body.trim().length > 0
+    );
+    if (valid.length >= 3) {
       setRows(valid);
     }
   }, [topics]);
+
+  const resetToOriginal = () => {
+    setRows(DEFAULT_TOPICS);
+  };
 
   const update = (idx: number, field: keyof Topic, value: string) => {
     setRows((prev) => {
@@ -59,6 +67,20 @@ export function TopicsEditor({ topics }: { topics: Topic[] }) {
   return (
     <div className="flex flex-col gap-4">
       <input type="hidden" name="topics_json" value={JSON.stringify(rows)} />
+
+      {/* Header bar with Reset action */}
+      <div className="flex items-center justify-between rounded-xl border border-steel/20 bg-ink-3/40 px-4 py-3">
+        <span className="font-mono text-xs text-bone">
+          Total Topics: <strong className="text-signal-bright">{rows.length}</strong>
+        </span>
+        <button
+          type="button"
+          onClick={resetToOriginal}
+          className="rounded-full border border-steel/30 bg-ink-2 px-3.5 py-1.5 font-mono text-[11px] text-bone hover:border-signal hover:text-signal-bright cursor-pointer transition-colors"
+        >
+          ↺ Reset to Original 6 Topics
+        </button>
+      </div>
 
       {rows.map((t, i) => (
         <div key={i} className="flex flex-col gap-4 rounded-xl border border-steel/20 bg-ink-3/40 p-5 shadow-sm">
