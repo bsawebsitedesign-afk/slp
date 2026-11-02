@@ -171,7 +171,7 @@ export async function getContent<K extends ContentKey>(key: K): Promise<SiteCont
         const dbNameLower = (dbItem.name || "").toLowerCase();
         const dbIdLower = (dbItem.id || "").toLowerCase();
 
-        const defaultItem = defaultArr.find((d: any) => {
+        const defaultItem: Record<string, any> = defaultArr.find((d: any) => {
           const dId = (d.id || "").toLowerCase();
           const dName = (d.name || "").toLowerCase();
           if (dbIdLower && dId && dbIdLower === dId) return true;
