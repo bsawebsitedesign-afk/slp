@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { createSession, destroySession, requireAdmin, verifyPassword } from "@/lib/auth";
-import { setContent, type ContentKey, type SiteContent } from "@/lib/content";
+import { DEFAULTS, setContent, type ContentKey, type SiteContent } from "@/lib/content";
 import { parseVideoId, syncChannel } from "@/lib/youtube";
 
 export type ActionState = { error?: string; ok?: string };
@@ -275,12 +275,26 @@ export async function saveContent(_prev: ActionState, fd: FormData): Promise<Act
 
       await setContent("slideshow", slidesList as SiteContent["slideshow"]);
     } else if (key === "topics") {
-      const titles = fd.getAll("topicTitle").map(String);
-      const bodies = fd.getAll("topicBody").map(String);
-      const topics = titles
-        .map((t, i) => ({ title: t.trim(), body: (bodies[i] ?? "").trim() }))
+      const raw = str(fd, "topics_json");
+      let topicsList: any[] = [];
+      if (raw) {
+        try {
+          topicsList = JSON.parse(raw);
+        } catch {
+          topicsList = [];
+        }
+      } else {
+        const titles = fd.getAll("topicTitle").map(String);
+        const bodies = fd.getAll("topicBody").map(String);
+        topicsList = titles.map((t, i) => ({ title: t, body: bodies[i] ?? "" }));
+      }
+      const topics = topicsList
+        .map((t: any) => ({
+          title: typeof t?.title === "string" ? t.title.trim() : "",
+          body: typeof t?.body === "string" ? t.body.trim() : "",
+        }))
         .filter((t) => t.title);
-      await setContent("topics", topics as SiteContent["topics"]);
+      await setContent("topics", (topics.length > 0 ? topics : DEFAULTS.topics) as SiteContent["topics"]);
     } else if (key === "contact") {
       const value: Record<string, unknown> = {};
       for (const [k, v] of fd.entries()) {

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import path from "path";
 import { readFile } from "fs/promises";
@@ -10,7 +10,7 @@ export async function GET(
   try {
     const { filename } = await params;
     if (!filename) {
-      return new NextResponse("Filename required", { status: 400 });
+      return new Response("Filename required", { status: 400 });
     }
 
     const cleanName = path.basename(filename);
@@ -29,7 +29,7 @@ export async function GET(
           ? "image/avif"
           : "image/jpeg";
 
-      return new NextResponse(fileBuffer, {
+      return new Response(new Uint8Array(fileBuffer), {
         headers: {
           "Content-Type": mime,
           "Cache-Control": "public, max-age=31536000, immutable",
@@ -48,7 +48,7 @@ export async function GET(
       const { mime, data } = row.value as { mime: string; data: string };
       if (data) {
         const buffer = Buffer.from(data, "base64");
-        return new NextResponse(buffer, {
+        return new Response(new Uint8Array(buffer), {
           headers: {
             "Content-Type": mime || "image/jpeg",
             "Cache-Control": "public, max-age=31536000, immutable",
@@ -57,10 +57,10 @@ export async function GET(
       }
     }
 
-    return new NextResponse("Image not found", { status: 404 });
+    return new Response("Image not found", { status: 404 });
   } catch (err) {
     console.error("[media] Error serving image:", err);
-    return new NextResponse("Error serving image", { status: 500 });
+    return new Response("Error serving image", { status: 500 });
   }
 }
 

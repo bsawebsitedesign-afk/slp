@@ -5,12 +5,27 @@ import { inputCls, Label } from "./ui";
 
 type Topic = { title: string; body: string };
 
+const DEFAULT_TOPICS: Topic[] = [
+  { title: "Physical Security", body: "The people, property, and critical assets side of the discipline—and the practitioners protecting them." },
+  { title: "Electronic Security", body: "The systems and integrations that make modern protection work, from the people deploying them." },
+  { title: "Cybersecurity", body: "Threats, defences and the leaders responding to a landscape that changes faster than ever." },
+  { title: "Leadership & Strategy", body: "Business and leadership strategies, plus lessons learned directly from security executives." },
+  { title: "Emerging Technology", body: "Breakthrough technologies and the innovations reshaping how the industry operates." },
+  { title: "Trends & Breaking News", body: "Emerging trends and industry analysis, unpacked without the press-release language." },
+];
+
 export function TopicsEditor({ topics }: { topics: Topic[] }) {
-  const [rows, setRows] = useState<Topic[]>(topics && topics.length ? topics : [{ title: "", body: "" }]);
+  const getInitial = () => {
+    const valid = (topics || []).filter((t) => t && typeof t.title === "string" && t.title.trim().length > 0);
+    return valid.length > 0 ? valid : DEFAULT_TOPICS;
+  };
+
+  const [rows, setRows] = useState<Topic[]>(getInitial);
 
   useEffect(() => {
-    if (topics && topics.length > 0) {
-      setRows(topics);
+    const valid = (topics || []).filter((t) => t && typeof t.title === "string" && t.title.trim().length > 0);
+    if (valid.length > 0) {
+      setRows(valid);
     }
   }, [topics]);
 
@@ -23,7 +38,10 @@ export function TopicsEditor({ topics }: { topics: Topic[] }) {
   };
 
   const remove = (idx: number) => {
-    setRows((prev) => prev.filter((_, j) => j !== idx));
+    setRows((prev) => {
+      const filtered = prev.filter((_, j) => j !== idx);
+      return filtered.length > 0 ? filtered : [{ title: "", body: "" }];
+    });
   };
 
   const move = (idx: number, dir: -1 | 1) => {
@@ -40,6 +58,8 @@ export function TopicsEditor({ topics }: { topics: Topic[] }) {
 
   return (
     <div className="flex flex-col gap-4">
+      <input type="hidden" name="topics_json" value={JSON.stringify(rows)} />
+
       {rows.map((t, i) => (
         <div key={i} className="flex flex-col gap-4 rounded-xl border border-steel/20 bg-ink-3/40 p-5 shadow-sm">
           <div className="flex items-center justify-between border-b border-steel/15 pb-2.5">

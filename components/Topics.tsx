@@ -8,6 +8,15 @@ type Topic = { title: string; body: string };
 
 const DOODLE_LIST = [DoodleShield, DoodleMic, DoodleLock, DoodleHeadphones, DoodleKey, DoodleRadar];
 
+const DEFAULT_TOPICS_FALLBACK: Topic[] = [
+  { title: "Physical Security", body: "The people, property, and critical assets side of the discipline—and the practitioners protecting them." },
+  { title: "Electronic Security", body: "The systems and integrations that make modern protection work, from the people deploying them." },
+  { title: "Cybersecurity", body: "Threats, defences and the leaders responding to a landscape that changes faster than ever." },
+  { title: "Leadership & Strategy", body: "Business and leadership strategies, plus lessons learned directly from security executives." },
+  { title: "Emerging Technology", body: "Breakthrough technologies and the innovations reshaping how the industry operates." },
+  { title: "Trends & Breaking News", body: "Emerging trends and industry analysis, unpacked without the press-release language." },
+];
+
 /**
  * Horizontal editorial rail. Scroll-snaps natively on touch; the desktop
  * progress bar is driven by the scroll container itself, not rAF.
@@ -20,6 +29,10 @@ export function TopicsRail({ topics }: { topics: Topic[] }) {
   const [isDragging, setIsDragging] = useState(false);
   const startX = useRef(0);
   const scrollLeftStart = useRef(0);
+
+  // Guarantee we NEVER render empty/blank cards
+  const validTopics = (topics || []).filter((t) => t && typeof t.title === "string" && t.title.trim().length > 0);
+  const displayTopics = validTopics.length > 0 ? validTopics : DEFAULT_TOPICS_FALLBACK;
 
   const updateScrollState = useCallback(() => {
     const el = ref.current;
@@ -116,7 +129,7 @@ export function TopicsRail({ topics }: { topics: Topic[] }) {
           isDragging ? "snap-none" : ""
         }`}
       >
-        {topics.map((t, i) => {
+        {displayTopics.map((t, i) => {
           const Icon = DOODLE_LIST[i % DOODLE_LIST.length];
           return (
             <Tilt3D
