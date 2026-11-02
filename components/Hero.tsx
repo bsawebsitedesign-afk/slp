@@ -264,7 +264,7 @@ export function Hero({ content, latest }: { content: HeroContent; latest: Latest
       <div className="shell relative flex w-full flex-col gap-[clamp(18px,3vh,36px)] px-0 z-10">
         
         {/* Main Hero 2-Column Layout */}
-        <div className="grid items-center gap-[clamp(30px,4vw,64px)] lg:grid-cols-[1fr_1.05fr] xl:grid-cols-[1fr_1.15fr] 2xl:grid-cols-[1fr_1.25fr]">
+        <div className="grid items-center gap-[clamp(24px,3vw,52px)] lg:grid-cols-[0.88fr_1.12fr] xl:grid-cols-[0.82fr_1.18fr] 2xl:grid-cols-[0.78fr_1.22fr]">
           
           {/* Left Column: Eyebrow, Headlines, Intro, CTAs */}
           <div className="flex flex-col gap-[clamp(18px,3vh,36px)]">
@@ -337,7 +337,7 @@ export function Hero({ content, latest }: { content: HeroContent; latest: Latest
           </div>
 
           {/* Right Column: 3D Levitating Hero Artwork + Floating Security Doodles */}
-          <div className="hero-rise relative order-first flex items-center justify-center lg:order-none lg:translate-z-20 w-full" style={{ animationDelay: "0.6s" }}>
+          <div className="hero-rise relative order-first flex items-center justify-center lg:order-none lg:translate-z-20 w-full lg:-mr-4 xl:-mr-8 2xl:-mr-12" style={{ animationDelay: "0.6s" }}>
             
 
 
@@ -354,7 +354,7 @@ export function Hero({ content, latest }: { content: HeroContent; latest: Latest
 
             {/* 3D Tilt Main Artwork - Large & Cinema Optimized */}
             <Tilt3D maxTilt={8} scale={1.02} className="relative flex items-center justify-center w-full">
-              <div className="relative z-10 aspect-[1024/438] w-full max-w-[850px] overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-steel/30 bg-ink-2/90 shadow-[0_35px_80px_-15px_rgba(0,0,0,0.95)] ring-1 ring-white/15 backdrop-blur-md transition-all duration-700 hover:border-signal/60 hover:shadow-[0_45px_90px_-15px_rgba(31,121,192,0.4)]">
+              <div className="relative z-10 aspect-[1024/438] w-full max-w-none overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-steel/30 bg-ink-2/90 shadow-[0_40px_90px_-15px_rgba(0,0,0,0.95)] ring-1 ring-white/15 backdrop-blur-md transition-all duration-700 hover:border-signal/60 hover:shadow-[0_50px_100px_-15px_rgba(31,121,192,0.45)]">
                 <Image
                   src="/brand/hero-hosts-studio.jpg"
                   alt="Security Leader Podcast Studio Artwork"
