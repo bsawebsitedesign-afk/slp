@@ -264,7 +264,7 @@ export function Hero({ content, latest }: { content: HeroContent; latest: Latest
       <div className="shell relative flex w-full flex-col gap-[clamp(18px,3vh,36px)] px-0 z-10">
         
         {/* Main Hero 2-Column Layout */}
-        <div className="grid items-center gap-[clamp(30px,4vw,64px)] lg:grid-cols-[1fr_480px] xl:grid-cols-[1fr_540px]">
+        <div className="grid items-center gap-[clamp(30px,4vw,64px)] lg:grid-cols-[1fr_1.05fr] xl:grid-cols-[1fr_1.15fr] 2xl:grid-cols-[1fr_1.25fr]">
           
           {/* Left Column: Eyebrow, Headlines, Intro, CTAs */}
           <div className="flex flex-col gap-[clamp(18px,3vh,36px)]">
@@ -337,7 +337,7 @@ export function Hero({ content, latest }: { content: HeroContent; latest: Latest
           </div>
 
           {/* Right Column: 3D Levitating Hero Artwork + Floating Security Doodles */}
-          <div className="hero-rise relative order-first flex items-center justify-center lg:order-none lg:translate-z-20" style={{ animationDelay: "0.6s" }}>
+          <div className="hero-rise relative order-first flex items-center justify-center lg:order-none lg:translate-z-20 w-full" style={{ animationDelay: "0.6s" }}>
             
 
 
@@ -352,15 +352,17 @@ export function Hero({ content, latest }: { content: HeroContent; latest: Latest
               </div>
             </div>
 
-            {/* 3D Tilt Main Artwork */}
-            <Tilt3D maxTilt={10} scale={1.03} className="relative flex items-center justify-center w-full">
-              <div className="relative z-10 aspect-[1024/438] w-full max-w-[540px] overflow-hidden rounded-2xl sm:rounded-3xl border border-steel/20 bg-ink-2/80 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.85)] ring-1 ring-white/10 backdrop-blur-sm transition-transform duration-700 hover:scale-[1.02]">
+            {/* 3D Tilt Main Artwork - Large & Cinema Optimized */}
+            <Tilt3D maxTilt={8} scale={1.02} className="relative flex items-center justify-center w-full">
+              <div className="relative z-10 aspect-[1024/438] w-full max-w-[850px] overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-steel/30 bg-ink-2/90 shadow-[0_35px_80px_-15px_rgba(0,0,0,0.95)] ring-1 ring-white/15 backdrop-blur-md transition-all duration-700 hover:border-signal/60 hover:shadow-[0_45px_90px_-15px_rgba(31,121,192,0.4)]">
                 <Image
                   src="/brand/hero-hosts-studio.jpg"
                   alt="Security Leader Podcast Studio Artwork"
                   fill
-                  sizes="(max-width: 1024px) 100vw, 540px"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 55vw, 850px"
                   priority
+                  quality={95}
+                  unoptimized
                   className="object-cover"
                 />
               </div>
