@@ -15,7 +15,7 @@ def make_white_transparent_pil(input_path, output_path):
     img.save(output_path, "PNG")
     print(f"Successfully saved clean transparent PNG to {output_path}")
 
-make_white_transparent_pil(
-    "/Users/ansh/.gemini/antigravity-ide/brain/262980b8-4f0e-4612-99a6-87aa345ef855/cartoon_listener_dark_bg_1787477259018.jpg",
-    "/Users/ansh/Desktop/securityleaderpodcast/public/brand/cartoon-listener.png"
-)
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 2:
+        make_white_transparent_pil(sys.argv[1], sys.argv[2])

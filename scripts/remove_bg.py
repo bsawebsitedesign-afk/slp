@@ -34,11 +34,7 @@ def remove_checkerboard(input_path, output_path):
     img.save(output_path, "PNG")
     print("Background removed successfully!")
 
-remove_checkerboard(
-    "/Users/ansh/.gemini/antigravity-ide/brain/262980b8-4f0e-4612-99a6-87aa345ef855/cartoon_podcast_listener_1787477116652.jpg",
-    "/Users/ansh/Desktop/securityleaderpodcast/public/brand/cartoon-listener.png"
-)
-remove_checkerboard(
-    "/Users/ansh/.gemini/antigravity-ide/brain/262980b8-4f0e-4612-99a6-87aa345ef855/cartoon_guest_avatar1_1787477134988.jpg",
-    "/Users/ansh/Desktop/securityleaderpodcast/public/brand/cartoon-guest-1.png"
-)
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 2:
+        remove_checkerboard(sys.argv[1], sys.argv[2])
